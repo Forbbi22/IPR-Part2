@@ -150,6 +150,22 @@ class C3TR(C3):
         c_ = int(c2 * e)
         self.m = TransformerBlock(c_, c_, 4, n)
 
+class SPPF(nn.Module):
+    # Spatial Pyramid Pooling - Fast layer
+    def __init__(self, c1, c2, k=(5, 9, 13)):  # k is a tuple of kernel sizes
+        super(SPPF, self).__init__()
+        c_ = c1 // 2  # hidden channels
+        self.cv1 = Conv(c1, c_, 1, 1)  # First convolution layer
+        self.cv2 = Conv(c_ * (len(k) + 1), c2, 1, 1)  # Final convolution layer
+        
+        # Create a ModuleList of MaxPool layers with varying kernel sizes
+        self.m = nn.ModuleList([nn.MaxPool2d(kernel_size=x, stride=1, padding=x // 2) for x in k])
+
+    def forward(self, x):
+        x = self.cv1(x)  # Apply first convolution
+        # Apply all max pooling layers and concatenate results
+        pooled_outputs = [x] + [pool(x) for pool in self.m]
+        return self.cv2(torch.cat(pooled_outputs, 1))  # Concatenate and apply final convolution
 
 class SPP(nn.Module):
     # Spatial pyramid pooling layer used in YOLOv3-SPP
