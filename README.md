@@ -1,4 +1,4 @@
-# EE798 Project
+# IPR Part 2
 
 ###Remember to do this 
 Install : ``` # prompt: Torch version: 2.4.1+cu121
